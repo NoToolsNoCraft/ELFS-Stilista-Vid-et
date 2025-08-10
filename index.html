@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Miamaya Style Assistant Widget</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Montserrat&display=swap');
+  :root {
+    --color-bg: #f9f7f5;
+    --color-primary: #3a2e2e;
+    --color-accent: #ad7a56;
+    --color-light: #e6e2d3;
+    --color-text: #3a2e2e;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Montserrat', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    margin: 0;
+    padding: 0;
+    color: var(--color-text);
+  }
+
+  /* Page content */
+  .page-header {
+    background-color: #daa682;
+    padding: 60px 20px 40px 20px;
+    text-align: center;
+    max-width: 100%;
+    font-family: var(--font-sans);
+    border-bottom: 1px solid #ddd;
+  }
+
+  .page-header h1 {
+    font-family: var(--font-serif);
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #ffffff;
+  }
+
+  .page-header p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #ffffff;
+    max-width: 800px;
+    margin: auto;
+  }
+
+  .page-section {
+    padding: 40px 20px;
+    max-width: 800px;
+    margin: auto;
+    font-size: 16px;
+    line-height: 1.8;
+    font-family: var(--font-sans);
+    color: var(--color-text);
+  }
+  .page-section h2 {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    color: var(--color-primary);
+    margin-top: 40px;
+    margin-bottom: 12px;
+  }
+  .page-section ul {
+    padding-left: 22px;
+    margin-top: 10px;
+  }
+  .page-section li {
+    margin-bottom: 8px;
+  }
+
+  .page-section a {
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .page-section a:hover {
+    text-decoration: underline;
+  }
+
+  .page-footer {
+    text-align: center;
+    padding: 40px 20px 20px;
+    font-size: 14px;
+    color: #000000;
+    font-family: var(--font-sans);
+  }
+  .page-footer a {
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .page-footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* Floating Button with Animation */
+  #styleAssistantBtn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 16px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(173, 122, 86, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    animation: pulse 2s infinite;
+  }
+  #styleAssistantBtn:hover {
+    background: #996c44;
+    transform: scale(1.05);
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  /* Slide-in Panel */
+  #styleAssistantPanel {
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    max-height: 100vh;
+    background: white;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+    padding: 20px 30px;
+    box-sizing: border-box;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    color: var(--color-primary);
+    display: flex;
+    flex-direction: column;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-accent) var(--color-light);
+  }
+  #styleAssistantPanel::-webkit-scrollbar {
+    width: 8px;
+  }
+  #styleAssistantPanel::-webkit-scrollbar-track {
+    background: var(--color-light);
+  }
+  #styleAssistantPanel::-webkit-scrollbar-thumb {
+    background: var(--color-accent);
+    border-radius: 4px;
+  }
+  #styleAssistantPanel.open {
+    right: 0;
+  }
+
+  /* Close Button */
+  #styleAssistantClose {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-accent);
+    cursor: pointer;
+    align-self: flex-end;
+    margin-bottom: 20px;
+    user-select: none;
+  }
+
+  #styleAssistantPanel h2 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    margin: 0 0 15px;
+    font-size: 28px;
+    color: var(--color-primary);
+  }
+
+  /* Welcome Message */
+  #welcomeMessage {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-primary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Progress Indicator */
+  #progressBar {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+  .progress-dot {
+    width: 40px;
+    height: 40px;
+    background: var(--color-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    transition: background 0.3s, color 0.3s;
+  }
+  .progress-dot.active {
+    background: var(--color-accent);
+    color: white;
+  }
+
+  /* Question Section */
+  .question {
+    margin-bottom: 24px;
+  }
+  .question label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: var(--color-primary);
+  }
+
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: #f8f5eb;
+    border: 1.5px solid var(--color-accent);
+    border-radius: 25px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-accent);
+    user-select: none;
+    transition: all 0.3s ease;
+    flex: 1 1 calc(50% - 10px);
+    text-align: center;
+  }
+  .option-btn:hover {
+    background: var(--color-light);
+  }
+  .option-btn.selected {
+    background: var(--color-accent);
+    color: white;
+  }
+
+  /* Buttons */
+  #nextBtn, #resetBtn, #addAllToCartBtn {
+    background: var(--color-accent);
+    border: none;
+    border-radius: 30px;
+    color: white;
+    padding: 14px 30px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(173, 122, 86, 0.4);
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+  }
+  #nextBtn:hover, #resetBtn:hover, #addAllToCartBtn:hover {
+    background: #996c44;
+  }
+
+  /* Outfit Results */
+  #outfitResults {
+    display: none;
+    flex-direction: column;
+    font-family: var(--font-sans);
+    color: var(--color-primary);
+    margin-bottom: 20px;
+  }
+  #outfitResults.show {
+    display: flex;
+  }
+  #productsContainer {
+    margin-bottom: 20px;
+  }
+  .product-card {
+    display: flex;
+    gap: 15px;
+    border: 1.5px solid var(--color-light);
+    border-radius: 12px;
+    padding: 12px;
+    align-items: center;
+    background: var(--color-bg);
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .product-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  .product-info {
+    flex-grow: 1;
+  }
+  .product-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0 0 6px 0;
+  }
+  .product-price {
+    font-weight: 600;
+    color: var(--color-accent);
+    font-size: 14px;
+    margin: 0;
+  }
+  .product-link, .add-to-cart-btn {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-accent);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 5px;
+  }
+  .add-to-cart-btn {
+    background: var(--color-accent);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    text-align: center;
+  }
+  .product-link:hover {
+    text-decoration: underline;
+    color: #996c44;
+  }
+  .add-to-cart-btn:hover {
+    background: #996c44;
+    text-decoration: none;
+  }
+  .size-select {
+    margin-top: 8px;
+    padding: 8px;
+    border: 1.5px solid var(--color-accent);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-primary);
+    background: #f8f5eb;
+    width: 100%;
+    max-width: 150px;
+  }
+  .size-select:focus {
+    outline: none;
+    border-color: #996c44;
+  }
+
+  /* Error Message for Size Selection */
+  #sizeErrorMessage {
+    color: #c0392b;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+    min-height: 1.2em;
+  }
+
+  /* Loading State */
+  #loadingState {
+    display: none;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-primary);
+    margin: 20px 0;
+  }
+  #loadingState.show {
+    display: block;
+  }
+
+  /* Responsive */
+  @media (max-width: 440px) {
+    #styleAssistantPanel {
+      width: 100vw;
+      right: -100vw;
+    }
+    #styleAssistantPanel.open {
+      right: 0;
+    }
+    #styleAssistantBtn {
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      font-size: 14px;
+    }
+    .product-card img {
+      width: 80px;
+      height: 80px;
+    }
+    .progress-dot {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>ELFS Modni Savetnik – Slide-in Vidžet</h1>
+    <p>
+      Dobrodošli u demonstraciju <strong>ELFS Modni Savetnik</strong> — personalizovanog modnog iskustva osmišljenog za ljubitelje luksuzne i trendi mode, kroz elegantni slide-in panel sa strane ekrana.
+    </p>
+    <p>
+      ________________________
+    </p>
+    <p style="font-size:18px; font-weight:700; background:#ffffff30; padding:12px; border-radius:8px; display:inline-block;">
+      Za razliku od klasičnih “preporuka” koje nude samo listu proizvoda, ovaj widget interaktivno vodi posetioca kroz izbor i daje gotovu ELFS kombinaciju odeće i aksesoara u svega par klikova — bez dugog pretraživanja i skrolovanja.
+    </p>
+</header>
+
+<section class="page-section">
+    <h2>Isprobajte sami</h2>
+    <p>Kliknite na 💡 <strong>Stilista</strong> dugme u donjem desnom uglu kako biste testirali iskustvo.</p>
+
+    <h2>Zašto bi ELFS trebalo da razmotri ovaj vidžet?</h2>
+    <p>Kao prepoznatljiv hrvatski luksuzni modni brend sa publikom koja ceni stil, kvalitet i kompletnu modnu priču, ELFS može kroz ovaj vidžet ponuditi dodatnu vrednost svojim kupcima. Slide-in asistent:</p>
+    <ul>
+      <li>Povećava angažovanost korisnika i produžava vreme provedeno na sajtu.</li>
+      <li>Pruža personalizovane modne kombinacije (odeća + aksesoari) koje mogu motivisati online i offline kupovinu.</li>
+      <li>Jača vezu kupaca sa brendom kroz interaktivno i zabavno iskustvo.</li>
+      <li>Može se u potpunosti prilagoditi ELFS paleti boja, vizuelnom identitetu i sezonskim kolekcijama.</li>
+    </ul>
+
+    <h3>Brza vizuelna poređenja</h3>
+    <table style="width:100%; border-collapse:collapse; margin-top:16px;">
+      <thead>
+        <tr style="background:#f2e8df;">
+          <th style="padding:10px; border:1px solid #ccc;">Klasičan recommendation alat</th>
+          <th style="padding:10px; border:1px solid #ccc;">Interaktivni ELFS vodič</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:10px; border:1px solid #ccc;">Lista proizvoda bez stila</td>
+          <td style="padding:10px; border:1px solid #ccc;">Kompletno stilizovan look</td>
+        </tr>
+        <tr>
+          <td style="padding:10px; border:1px solid #ccc;">Pasivno — korisnik bira sam</td>
+          <td style="padding:10px; border:1px solid #ccc;">Aktivno — korisnik odgovara na par pitanja</td>
+        </tr>
+        <tr>
+          <td style="padding:10px; border:1px solid #ccc;">Traži vreme i strpljenje</td>
+          <td style="padding:10px; border:1px solid #ccc;">Predlog spreman za 20 sekundi</td>
+        </tr>
+        <tr>
+          <td style="padding:10px; border:1px solid #ccc;">Generičke sugestije</td>
+          <td style="padding:10px; border:1px solid #ccc;">ELFS-stil personalizacija</td>
+        </tr>
+        <tr>
+          <td style="padding:10px; border:1px solid #ccc;">Slaba interakcija</td>
+          <td style="padding:10px; border:1px solid #ccc;">Visoka angažovanost posetilaca</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Kako ovo može izgledati na elfs.hr?</h2>
+    <p>Zamislite da posetilac sajta, umesto pretrage kroz stotine artikala, dobije gotovu ELFS kombinaciju — haljina, torbica, cipele — sve u skladu sa njegovim stilom i prilikom. To je iskustvo koje ovaj vidžet donosi.</p>
+
+    <p>👉 Povežite se sa mnom putem <a href="https://www.linkedin.com/in/petar-skrbic/" target="_blank" rel="noopener">LinkedIn-a</a> ili preko email adrese <b>notoolsnocraft@gmail.com</b> kako bismo razgovarali o tome kako da ovaj koncept pretvorimo u deo vašeg online iskustva.</p>
+</section>
+
+<footer class="page-footer">
+    <p>© 2025 – Ovu demonstraciju je kreirao <a href="https://www.linkedin.com/in/petar-skrbic/" target="_blank" rel="noopener">Petar Škrbić</a>.</p>
+</footer>
+
+  <button id="styleAssistantBtn" aria-label="Otvorite Stilistu">💡 Stilista</button>
+
+  <aside id="styleAssistantPanel" aria-hidden="true" aria-label="Pomoć pri odabiru stila">
+    <div id="styleAssistantClose" role="button" tabindex="0" aria-label="Zatvori Stilistu">&times;</div>
+
+    <h2>Vaš lični stilista</h2>
+    <p id="welcomeMessage">Pronađite savršenu kombinaciju za samo 20 sekundi! Odgovorite na četiri pitanja i dobićete personalizovanu preporuku + <strong>5% popusta</strong> na vašu porudžbinu!</p>
+
+    <div id="progressBar">
+      <span class="progress-dot active">1</span>
+      <span class="progress-dot">2</span>
+      <span class="progress-dot">3</span>
+      <span class="progress-dot">4</span>
+    </div>
+
+    <form id="styleForm" aria-live="polite">
+      <section id="question0" class="question" data-question="category">
+        <label>Tražite artikle za?</label>
+        <div class="options">
+          <div class="option-btn" tabindex="0" data-value="Žene">Žene</div>
+          <div class="option-btn" tabindex="0" data-value="Muškarci">Muškarci</div>
+        </div>
+      </section>
+
+      <section id="question1" class="question" data-question="occasion" hidden>
+        <label>Za koju priliku tražite kombinaciju?</label>
+        <div class="options">
+          <div class="option-btn" tabindex="0" data-value="Svaki dan">Svaki dan</div>
+          <div class="option-btn" tabindex="0" data-value="Posao">Posao</div>
+          <div class="option-btn" tabindex="0" data-value="Veče">Veče</div>
+          <div class="option-btn" tabindex="0" data-value="Venčanje">Venčanje</div>
+        </div>
+      </section>
+
+      <section id="question2" class="question" data-question="style" hidden>
+        <label>Koji stil vam najviše odgovara?</label>
+        <div class="options">
+          <div class="option-btn" tabindex="0" data-value="Elegantni">Elegantni</div>
+          <div class="option-btn" tabindex="0" data-value="Trendi">Trendi</div>
+          <div class="option-btn" tabindex="0" data-value="Minimalistički">Minimalistički</div>
+          <div class="option-btn" tabindex="0" data-value="Upadljivi">Upadljivi</div>
+        </div>
+      </section>
+
+      <section id="question3" class="question" data-question="color" hidden>
+        <label>Koju boju ili ton preferirate?</label>
+        <div class="options">
+          <div class="option-btn" tabindex="0" data-value="Neutralne">Neutralne</div>
+          <div class="option-btn" tabindex="0" data-value="Topli tonovi">Topli tonovi</div>
+          <div class="option-btn" tabindex="0" data-value="Hladni tonovi">Hladni tonovi</div>
+          <div class="option-btn" tabindex="0" data-value="Raznovrsno">Raznovrsno</div>
+        </div>
+      </section>
+
+      <button type="button" id="nextBtn" aria-label="Dalje">Dalje</button>
+      <div id="errorMessage" role="alert" aria-live="assertive" style="color: #c0392b; font-size: 14px; margin-top: 10px; min-height: 1.2em;"></div>
+    </form>
+
+    <div id="loadingState">Učitavanje vaših preporuka...</div>
+
+    <section id="outfitResults" aria-live="polite" aria-atomic="true">
+      <h3>Vaša savršena kombinacija</h3>
+      <p style="font-size: 14px; margin-bottom: 20px;">Dodajte celu kombinaciju u korpu i uštedite 5%!</p>
+      <div id="productsContainer"></div>
+
+      <!-- <button id="addAllToCartBtn" aria-label="Dodaj celu kombinaciju u korpu">Dodaj sve u korpu</button> -->
+
+      <div id="sizeErrorMessage" role="alert" aria-live="assertive"></div>
+      <button id="resetBtn" aria-label="Počni iznova">🔄 Počni iznova</button>
+    </section>
+  </aside>
+
+  <script>
+  (function() {
+    const btnOpen = document.getElementById('styleAssistantBtn');
+    const panel = document.getElementById('styleAssistantPanel');
+    const btnClose = document.getElementById('styleAssistantClose');
+    const form = document.getElementById('styleForm');
+    const nextBtn = document.getElementById('nextBtn');
+    const outfitResults = document.getElementById('outfitResults');
+    const productsContainer = document.getElementById('productsContainer');
+    const resetBtn = document.getElementById('resetBtn');
+    const addAllToCartBtn = document.getElementById('addAllToCartBtn');
+    const loadingState = document.getElementById('loadingState');
+    const sizeErrorMessage = document.getElementById('sizeErrorMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const progressDots = document.querySelectorAll('.progress-dot');
+
+    let currentStep = 1;
+    const totalSteps = 4;
+    const answers = {};
+
+    // Expanded product data with category differentiation
+    const productSets = {
+      "Žene|Svaki dan|Elegantni|Neutralne": [
+        { name: "Ženski T-shirt RAZGLEDNICA OPATIJA", price: "33,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033268_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/zenski-t-shirt-razglednica-opatija/", sizes: ["XS", "S", "M", "L", "XL"] },
+        { name: "Sunčane naočale AGNETHA SG", price: "170,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033099-SG_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/suncane-naocale-agnetha-sg-b4-2858/", sizes: ["One Size"] },
+        { name: "Torbica MALENA C XS", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033505-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/torbica-malena-c-xs/", sizes: ["One Size"] }
+      ],
+      "Žene|Posao|Elegantni|Neutralne": [
+        { name: "Ženski T-shirt RAZGLEDNICA OPATIJA", price: "33,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033268_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/zenski-t-shirt-razglednica-opatija/", sizes: ["XS", "S", "M", "L", "XL"] },
+        { name: "Sunčane naočale AGNETHA SG", price: "170,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033099-SG_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/suncane-naocale-agnetha-sg-b4-2858/", sizes: ["One Size"] },
+        { name: "Torbica MALENA C XS", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033505-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/torbica-malena-c-xs/", sizes: ["One Size"] }
+      ],
+      "Žene|Veče|Upadljivi|Topli tonovi": [
+        { name: "Ženski T-shirt RAZGLEDNICA OPATIJA", price: "33,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033268_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/zenski-t-shirt-razglednica-opatija/", sizes: ["XS", "S", "M", "L", "XL"] },
+        { name: "Sunčane naočale AGNETHA SG", price: "170,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033099-SG_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/suncane-naocale-agnetha-sg-b4-2858/", sizes: ["One Size"] },
+        { name: "Torbica MALENA C XS", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033505-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/torbica-malena-c-xs/", sizes: ["One Size"] }
+      ],
+      "Žene|Svaki dan|Trendi|Raznovrsno": [
+        { name: "Ženski T-shirt RAZGLEDNICA OPATIJA", price: "33,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033268_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/zenski-t-shirt-razglednica-opatija/", sizes: ["XS", "S", "M", "L", "XL"] },
+        { name: "Sunčane naočale AGNETHA SG", price: "170,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033099-SG_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/suncane-naocale-agnetha-sg-b4-2858/", sizes: ["One Size"] },
+        { name: "Torbica MALENA C XS", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033505-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/torbica-malena-c-xs/", sizes: ["One Size"] }
+      ],
+      "Žene|Posao|Minimalistički|Hladni tonovi": [
+        { name: "Ženski T-shirt RAZGLEDNICA OPATIJA", price: "33,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033268_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/zenski-t-shirt-razglednica-opatija/", sizes: ["XS", "S", "M", "L", "XL"] },
+        { name: "Sunčane naočale AGNETHA SG", price: "170,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033099-SG_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/suncane-naocale-agnetha-sg-b4-2858/", sizes: ["One Size"] },
+        { name: "Torbica MALENA C XS", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033505-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/torbica-malena-c-xs/", sizes: ["One Size"] }
+      ],
+      "Muškarci|Svaki dan|Elegantni|Neutralne": [
+        { name: "Muški T-shirt ELFS CRO TP", price: "25,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033047_1-2-900x1350.jpg", link: "https://www.elfs.hr/proizvod/muski-t-shirt-elfs-cro-tp/", sizes: ["S", "M", "L", "XL"] },
+        { name: "Šilterica ELFS CROATIA CRNA", price: "30,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033327-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/silterica-elfs-croatia-crna/", sizes: ["55-56", "57-58"] },
+        { name: "Japanke ELFS CRO", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033290_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/japanke-elfs-cro/", sizes: ["37", "41", "45"] }
+      ],
+      "Muškarci|Posao|Elegantni|Neutralne": [
+        { name: "Muški T-shirt ELFS CRO TP", price: "25,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033047_1-2-900x1350.jpg", link: "https://www.elfs.hr/proizvod/muski-t-shirt-elfs-cro-tp/", sizes: ["S", "M", "L", "XL"] },
+        { name: "Šilterica ELFS CROATIA CRNA", price: "30,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033327-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/silterica-elfs-croatia-crna/", sizes: ["55-56", "57-58"] },
+        { name: "Japanke ELFS CRO", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033290_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/japanke-elfs-cro/", sizes: ["37", "41", "45"] }
+      ],
+      "Muškarci|Veče|Upadljivi|Topli tonovi": [
+        { name: "Muški T-shirt ELFS CRO TP", price: "25,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033047_1-2-900x1350.jpg", link: "https://www.elfs.hr/proizvod/muski-t-shirt-elfs-cro-tp/", sizes: ["S", "M", "L", "XL"] },
+        { name: "Šilterica ELFS CROATIA CRNA", price: "30,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033327-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/silterica-elfs-croatia-crna/", sizes: ["55-56", "57-58"] },
+        { name: "Japanke ELFS CRO", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033290_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/japanke-elfs-cro/", sizes: ["37", "41", "45"] }
+      ],
+      "Muškarci|Svaki dan|Trendi|Raznovrsno": [
+        { name: "Muški T-shirt ELFS CRO TP", price: "25,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033047_1-2-900x1350.jpg", link: "https://www.elfs.hr/proizvod/muski-t-shirt-elfs-cro-tp/", sizes: ["S", "M", "L", "XL"] },
+        { name: "Šilterica ELFS CROATIA CRNA", price: "30,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033327-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/silterica-elfs-croatia-crna/", sizes: ["55-56", "57-58"] },
+        { name: "Japanke ELFS CRO", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033290_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/japanke-elfs-cro/", sizes: ["37", "41", "45"] }
+      ],
+      "Muškarci|Posao|Minimalistički|Hladni tonovi": [
+        { name: "Muški T-shirt ELFS CRO TP", price: "25,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033047_1-2-900x1350.jpg", link: "https://www.elfs.hr/proizvod/muski-t-shirt-elfs-cro-tp/", sizes: ["S", "M", "L", "XL"] },
+        { name: "Šilterica ELFS CROATIA CRNA", price: "30,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033327-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/silterica-elfs-croatia-crna/", sizes: ["55-56", "57-58"] },
+        { name: "Japanke ELFS CRO", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033290_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/japanke-elfs-cro/", sizes: ["37", "41", "45"] }
+      ],
+    };
+
+    // Default products for women
+    const defaultWomenProducts = [
+      { name: "Ženski T-shirt RAZGLEDNICA OPATIJA", price: "33,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033268_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/zenski-t-shirt-razglednica-opatija/", sizes: ["XS", "S", "M", "L", "XL"] },
+      { name: "Torbica MALENA C XS", price: "45,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033505-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/torbica-malena-c-xs/", sizes: ["One Size"] }
+    ];
+
+    // Default products for men
+    const defaultMenProducts = [
+      { name: "Muški T-shirt ELFS CRO TP", price: "25,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033047_1-2-900x1350.jpg", link: "https://www.elfs.hr/proizvod/muski-t-shirt-elfs-cro-tp/", sizes: ["S", "M", "L", "XL"] },
+      { name: "Šilterica ELFS CROATIA CRNA", price: "30,00 €", img: "https://raw.githubusercontent.com/NoToolsNoCraft/ELFS-Stilista-Vid-et/refs/heads/main/033327-C_1-900x1350.jpg", link: "https://www.elfs.hr/proizvod/silterica-elfs-croatia-crna/", sizes: ["55-56", "57-58"] }
+    ];
+
+    // Open panel with focus management
+    btnOpen.addEventListener('click', () => {
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      document.getElementById('styleForm').querySelector('.option-btn').focus();
+      panel.scrollTop = 0; // Reset scroll on open
+    });
+
+    // Close panel
+    btnClose.addEventListener('click', () => {
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      btnOpen.focus();
+    });
+    btnClose.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        btnClose.click();
+      }
+    });
+
+    // Option selection handler
+    form.querySelectorAll('.options').forEach(optionsContainer => {
+      optionsContainer.addEventListener('click', e => {
+        if (!e.target.classList.contains('option-btn')) return;
+        optionsContainer.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        e.target.classList.add('selected');
+        errorMessage.textContent = '';
+        nextBtn.focus();
+      });
+    });
+
+    form.querySelectorAll('.options').forEach(optionsContainer => {
+      optionsContainer.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            btn.click();
+          }
+        });
+      });
+    });
+
+    // Next button click
+    nextBtn.addEventListener('click', () => {
+      const questionEl = form.querySelector(`[data-question]:not([hidden])`);
+      if (!questionEl) return;
+
+      const selectedOption = questionEl.querySelector('.option-btn.selected');
+      if (!selectedOption) {
+        errorMessage.textContent = 'Molimo vas, izaberite opciju da biste nastavili.';
+        return;
+      } else {
+        errorMessage.textContent = '';
+      }
+
+      const questionName = questionEl.getAttribute('data-question');
+      answers[questionName] = selectedOption.getAttribute('data-value');
+
+      if (currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+      } else {
+        showResults();
+      }
+    });
+
+    function showStep(step) {
+      form.querySelectorAll('[data-question]').forEach(el => el.hidden = true);
+      form.querySelector(`[data-question="${getQuestionName(step)}"]`).hidden = false;
+
+      progressDots.forEach((dot, index) => {
+        dot.classList.toggle('active', index < step);
+      });
+
+      if (step === totalSteps) {
+        nextBtn.textContent = 'Prikaži preporuke';
+      } else {
+        nextBtn.textContent = 'Dalje';
+      }
+      panel.scrollTop = 0; // Reset scroll on step change
+    }
+
+    function getQuestionName(step) {
+      switch(step) {
+        case 1: return 'category';
+        case 2: return 'occasion';
+        case 3: return 'style';
+        case 4: return 'color';
+        default: return null;
+      }
+    }
+
+    function resetAnswers() {
+      Object.keys(answers).forEach(k => delete answers[k]);
+      form.querySelectorAll('.option-btn.selected').forEach(btn => btn.classList.remove('selected'));
+      outfitResults.classList.remove('show');
+      loadingState.classList.remove('show');
+      productsContainer.innerHTML = '';
+      nextBtn.style.display = 'block';
+      if (addAllToCartBtn) {
+        addAllToCartBtn.style.display = 'none';
+      }
+      sizeErrorMessage.textContent = '';
+      errorMessage.textContent = '';
+      currentStep = 1;
+      showStep(currentStep);
+      const firstOption = form.querySelector('.option-btn');
+      if (firstOption) {
+        firstOption.focus();
+      }
+      panel.scrollTop = 0; // Reset scroll position
+    }
+
+    resetBtn.addEventListener('click', () => {
+      resetAnswers();
+    });
+
+    function showResults() {
+      nextBtn.style.display = 'none';
+      form.querySelectorAll('[data-question]').forEach(el => el.hidden = true);
+      loadingState.classList.add('show');
+
+      setTimeout(() => {
+        loadingState.classList.remove('show');
+        sizeErrorMessage.textContent = '';
+        const key = `${answers.category}|${answers.occasion}|${answers.style}|${answers.color}`;
+        // Select default products based on category
+        const products = productSets[key] || (answers.category === 'Žene' ? defaultWomenProducts : defaultMenProducts);
+
+        productsContainer.innerHTML = '';
+        products.forEach((prod, index) => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+          const sizeOptions = prod.sizes.map(size => `<option value="${size}">${size}</option>`).join('');
+          card.innerHTML = `
+            <img src="${prod.img}" alt="${prod.name}">
+            <div class="product-info">
+              <p class="product-name">${prod.name}</p>
+              <p class="product-price">${prod.price}</p>
+              <select class="size-select" data-product-id="${index}" aria-label="Izaberite veličinu za ${prod.name}">
+                <option value="">Izaberi veličinu</option>
+                ${sizeOptions}
+              </select>
+              <a class="product-link" href="${prod.link}" target="_blank" rel="noopener">Pogledaj proizvod</a>
+              <button class="add-to-cart-btn" data-product-id="${index}" aria-label="Dodaj ${prod.name} u korpu">Dodaj u korpu</button>
+            </div>
+          `;
+          productsContainer.appendChild(card);
+        });
+
+        productsContainer.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const productId = btn.getAttribute('data-product-id');
+            const sizeSelect = productsContainer.querySelector(`.size-select[data-product-id="${productId}"]`);
+            const selectedSize = sizeSelect.value;
+
+            if (!selectedSize) {
+              sizeErrorMessage.textContent = `Molimo izaberite veličinu za ${products[productId].name}.`;
+              return;
+            }
+
+            alert(`Dodavanje u korpu: ${products[productId].name} (Veličina: ${selectedSize})`);
+          });
+        });
+
+        outfitResults.classList.add('show');
+        if (addAllToCartBtn) {
+          addAllToCartBtn.style.display = 'block';
+        }
+        panel.scrollTop = 0;
+      }, 1000);
+    }
+
+    if (addAllToCartBtn) {
+      addAllToCartBtn.addEventListener('click', () => {
+        const key = `${answers.category}|${answers.occasion}|${answers.style}|${answers.color}`;
+        const products = productSets[key] || (answers.category === 'Žene' ? defaultWomenProducts : defaultMenProducts);
+        const sizeSelects = productsContainer.querySelectorAll('.size-select');
+        const selectedSizes = Array.from(sizeSelects).map((select, index) => ({
+          product: products[index].name,
+          size: select.value
+        }));
+
+        const missingSizes = selectedSizes.filter(item => !item.size);
+        if (missingSizes.length > 0) {
+          sizeErrorMessage.textContent = `Molimo izaberite veličinu za: ${missingSizes.map(item => item.product).join(', ')}.`;
+          return;
+        }
+
+        alert(`Dodavanje u korpu: ${selectedSizes.map(item => `${item.product} (Veličina: ${item.size})`).join(', ')}`);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
